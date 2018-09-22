@@ -32,7 +32,6 @@ public class MyStack<AnyType> {
 			sb.append(x + " ");
 		return new String(sb);
 	}
-
 }
 
 class CheckBalance {
@@ -56,8 +55,8 @@ class CheckBalance {
 	}
 
 	public static boolean isPaired(char open, char close) {
-		if (open == '[' && close == ']' || 
-			open == '{' && close == '}' || 
+		if (open == '[' && close == ']' ||
+			open == '{' && close == '}' ||
 			open == '(' && close == ')')
 			return true;
 		return false;
@@ -65,12 +64,11 @@ class CheckBalance {
 
 	public static void main(String[] args) {
 
-		
-		String str = "[(])";         	//not balanced
-		String str2 = "()(){}{}{()}";   //balanced
-		String str3= "((({}{}))()";     //not balanced
-		String str4 = "[{{[(){}]}}[]{}{({())}}]"; //not balanced
-		String str5 = "[{{[(){}]}}[]{}{{(())}}]"; //balanced
+		String str = "[(])"; // not balanced
+		String str2 = "()(){}{}{()}"; // balanced
+		String str3 = ")("; // not balanced
+		String str4 = "[{{[(){}]}}[]{}{({())}}]"; // not balanced
+		String str5 = "[{{[(){}]}}[]{}{{(())}}]"; // balanced
 
 		System.out.println(isBalanced(str));
 		System.out.println(isBalanced(str2));
