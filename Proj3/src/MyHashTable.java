@@ -4,12 +4,14 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MyHashTable<AnyType> {
 
-	private static final int DEFAULT_TABLE_SIZE = 7; // 109617
-	private static final String DICTIONARY_FILE = "src/testDic.txt";
+	private static final int DEFAULT_TABLE_SIZE = 1000; // 109617
+	private static final String DICTIONARY_FILE = "src/dictionary.txt";
 
 	private HashEntry<AnyType>[] array; // The array of elements
 	private int occupied; // The number of occupied cells
@@ -59,7 +61,7 @@ public class MyHashTable<AnyType> {
 
 		// Copy table over
 		for (HashEntry<AnyType> entry : oldArray)
-			if (entry != null && entry.isActive)
+			if (entry != null)
 				insert(entry.element);
 	}
 
@@ -107,10 +109,6 @@ public class MyHashTable<AnyType> {
 		return theSize;
 	}
 
-	public int occudied() {
-		return occupied;
-	}
-
 	/**
 	 * Get length of internal table.
 	 * 
@@ -121,16 +119,49 @@ public class MyHashTable<AnyType> {
 	}
 
 	/**
-	 * Find an item in the hash table.
+	 * Check if a item exist.
 	 * 
 	 * @param x the item to search for.
-	 * @return the matching item.
+	 * @return true if exist.
 	 */
 	public boolean contains(AnyType x) {
 		int currentPos = findPos(x);
 		return isActive(currentPos);
 	}
 
+	/**
+	 * Find an item in the hash table.
+	 * 
+	 * @param x the item to search for.
+	 * @return the matching item.
+	 */
+	public String findword(String x) {
+		StringBuilder sb = new StringBuilder();
+		StringBuilder result = new StringBuilder();
+		String reversed = sb.append(x).reverse().toString();
+
+		int currentPos1 = findPos((AnyType) x);
+		int currentPos2 = findPos((AnyType) reversed);
+
+		// find 1
+		if (isActive(currentPos1) ^ isActive(currentPos2)) {
+			if (isActive(currentPos1)) {
+				result.append((String) array[currentPos1].element);
+			} else {
+				result.append((String) array[currentPos2].element);
+			}
+			return result.toString();
+		}
+		// find 2
+		if (isActive(currentPos1) && isActive(currentPos2)) {
+			result.append((String) array[currentPos1].element).append("\n");
+			result.append((String) array[currentPos2].element);
+			return result.toString();
+		}
+
+		return "";
+	}
+	
 	/**
 	 * Return true if currentPos exists and is active.
 	 * 
@@ -225,6 +256,11 @@ public class MyHashTable<AnyType> {
 		return true;
 	}
 
+	/**
+	 * Load external dictionary file into MyHashTable
+	 * 
+	 * @param fileName Path and file name of dictionary
+	 */
 	private void loadDictionary(String fileName) {
 		List<String> dic = Collections.emptyList();
 		try {
@@ -234,49 +270,11 @@ public class MyHashTable<AnyType> {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		
+
 		for (String line : dic) {
-			insert((AnyType)line);
+			insert((AnyType) line);
 		}
 
-	}
-
-	// Simple main
-	public static void main(String[] args) {
-		MyHashTable<String> hashtable = new MyHashTable<>();
-
-		long startTime = System.currentTimeMillis();
-
-		System.out.println(hashtable.size());
-		System.out.println(hashtable.occudied());
-		
-		
-		
-//		final int NUMS = 1000;
-//		final int GAP = 37;
-//		System.out.println("Checking... (no more output means success)");
-
-//		for (int i = GAP; i != 0; i = (i + GAP) % NUMS)
-//			H.insert("" + i);
-//		for (int i = GAP; i != 0; i = (i + GAP) % NUMS)
-//			if (H.insert("" + i))
-//				System.out.println("OOPS!!! " + i);
-//		for (int i = 1; i < NUMS; i += 2)
-//			H.remove("" + i);
-//
-//		for (int i = 2; i < NUMS; i += 2)
-//			if (!H.contains("" + i))
-//				System.out.println("Find fails " + i);
-//
-//		for (int i = 1; i < NUMS; i += 2) {
-//			if (H.contains("" + i))
-//				System.out.println("OOPS!!! " + i);
-//		}
-
-		long endTime = System.currentTimeMillis();
-
-		System.out.println("Elapsed time: " + (endTime - startTime));
 	}
 
 }

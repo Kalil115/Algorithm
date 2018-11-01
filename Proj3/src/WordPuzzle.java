@@ -1,5 +1,9 @@
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
 
 /**
  * 1. matrix of charactor 2. dictionary
@@ -17,6 +21,7 @@ public class WordPuzzle {
 	private int row;
 	private int col;
 	private char[][] matrix = {};
+	private Set<String> result = new HashSet<>();
 
 	public WordPuzzle(int row, int col) {
 		this.row = row;
@@ -37,43 +42,78 @@ public class WordPuzzle {
 	public void printWordPuzzle() {
 		for (int i = 0; i < row; i++) {
 			for (int j = 0; j < col; j++) {
-				System.out.print(matrix[i][j]);
+				System.out.print(matrix[i][j]+" ");
 			}
 			System.out.println();
 		}
 	}
 
+	public void solvePuzzle() {
+		List<Character> word = new ArrayList<>();
+
+	}
+	
+	static int input(String prompt) {
+		System.out.print(prompt);
+		Scanner sc = new Scanner(System.in);
+		int i = 0;
+		if (sc.hasNextInt()) {
+			i = sc.nextInt();
+		}else {
+			System.out.println("please enter a number");
+			sc.next();
+		}
+		sc.close();
+		return i;
+	}
+	
+	public void addResult(String wordfound) {
+		String[] words = wordfound.split("\n");
+        for(String word : words) {
+        	result.add(word);
+        }
+    }
+	
+	public Set<String> getResult() {
+		return result;
+	}
+	
+	public int getResultCount() {
+		return result.size();
+	}
+
 	public static void main(String[] args) {
 
-		Scanner sc = new Scanner(System.in);
-		int row = 0;
-		int col = 0;
+		MyHashTable<String> wordlist = new MyHashTable<>();
+		System.out.println(wordlist.size());
 
-		do {
-			System.out.print("please input number of rows:");
-			if (sc.hasNextInt()) {
-				row = sc.nextInt();
-			} else {
-				System.out.println("please enter a number");
-				sc.next();
-			}
-		} while (row <= 0);
+		int row = 10;
+		int col = 10;
 
-		do {
-			System.out.print("please input number of columns:");
-			if (sc.hasNextInt()) {
-				col = sc.nextInt();
-			} else {
-				System.out.println("please enter a number");
-				sc.next();
-			}
-		} while (col <= 0);
-		
-		sc.close();
+//		do {
+//			row = input("please input number of rows:");
+//		} while (row <= 0);
+//
+//		do {
+//		col = input("please input number of columns:");
+//		} while (col <= 0);
+
 
 		System.out.println("Rows:" + row + ", Columns:" + col);
+
+		long startTime = System.currentTimeMillis();
 		WordPuzzle wordPuzzle = new WordPuzzle(row, col);
 
 		wordPuzzle.printWordPuzzle();
+
+		long endTime = System.currentTimeMillis();
+
+		
+		wordPuzzle.addResult(wordlist.findword("no"));
+		
+		System.out.println("\nResult: " + wordPuzzle.getResultCount());
+		System.out.println(wordPuzzle.getResult());
+
+		System.out.println("Elapsed time: " + (endTime - startTime));
 	}
 }
