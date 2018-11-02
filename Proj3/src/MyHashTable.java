@@ -1,21 +1,22 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class MyHashTable<AnyType> {
 
-	private static final int DEFAULT_TABLE_SIZE = 1000; // 109617
-	private static final String DICTIONARY_FILE = "src/dictionary.txt";
+	private static final int DEFAULT_TABLE_SIZE = 101; // 109617
 
 	private HashEntry<AnyType>[] array; // The array of elements
 	private int occupied; // The number of occupied cells
 	private int theSize; // Current size
+	private int maxLength; // maxLength of a word
 
 	public MyHashTable() {
 		this(DEFAULT_TABLE_SIZE);
@@ -23,7 +24,12 @@ public class MyHashTable<AnyType> {
 
 	public MyHashTable(int size) {
 		allocateArray(size);
-		loadDictionary(DICTIONARY_FILE);
+		doClear();
+	}
+
+	public MyHashTable(String dictionaryFile) {
+		this(DEFAULT_TABLE_SIZE);
+		loadDictionary(dictionaryFile);
 	}
 
 	/**
@@ -32,18 +38,45 @@ public class MyHashTable<AnyType> {
 	 * @param x the item to insert.
 	 */
 	public boolean insert(AnyType x) {
+		return insert(x, false);
+	}
+
+	/**
+	 * Internal method to insert into the hash table.
+	 * 
+	 * @param x      the item to insert.
+	 * @param prefix true if the item is a prefix
+	 */
+	private boolean insert(AnyType x, boolean prefix) {
 		// Insert x as active
 		int currentPos = findPos(x);
-		if (isActive(currentPos)) // see if element is duplicated
+		if (isActive(currentPos))
 			return false;
 
 		if (array[currentPos] == null)
 			++occupied;
-		array[currentPos] = new HashEntry<>(x, true, false);
+		array[currentPos] = new HashEntry<>(x, true, prefix);
 		theSize++;
 
 		if (occupied > array.length / 2)
 			rehash();
+
+		return true;
+	}
+
+	/**
+	 * Internal method to update a item status.
+	 * 
+	 * @param x      the item to update.
+	 * @param prefix true if the item is a prefix
+	 * @return
+	 */
+	private boolean update(AnyType x, boolean prefix) {
+		int currentPos = findPos(x);
+		if (!isActive(currentPos) || array[currentPos] == null)
+			return insert(x, prefix);
+
+		array[currentPos].isPrefix = prefix;
 
 		return true;
 	}
@@ -119,6 +152,15 @@ public class MyHashTable<AnyType> {
 	}
 
 	/**
+	 * Get maxLength of a word
+	 * 
+	 * @return maxLength
+	 */
+	public int maxLength() {
+		return maxLength;
+	}
+
+	/**
 	 * Check if a item exist.
 	 * 
 	 * @param x the item to search for.
@@ -161,7 +203,7 @@ public class MyHashTable<AnyType> {
 
 		return "";
 	}
-	
+
 	/**
 	 * Return true if currentPos exists and is active.
 	 * 
@@ -170,6 +212,10 @@ public class MyHashTable<AnyType> {
 	 */
 	private boolean isActive(int currentPos) {
 		return array[currentPos] != null && array[currentPos].isActive;
+	}
+
+	private boolean isPrefix(int currentPos) {
+		return array[currentPos] != null && array[currentPos].isPrefix;
 	}
 
 	/**
@@ -198,7 +244,7 @@ public class MyHashTable<AnyType> {
 	private static class HashEntry<AnyType> {
 		public AnyType element; // the element
 		public boolean isActive; // false if marked deleted
-		public boolean isprefix; // false if is a word
+		public boolean isPrefix; // false if is a word
 
 		public HashEntry(AnyType e) {
 			this(e, true, false);
@@ -207,7 +253,7 @@ public class MyHashTable<AnyType> {
 		public HashEntry(AnyType element, boolean isActive, boolean isprefix) {
 			this.element = element;
 			this.isActive = isActive;
-			this.isprefix = isprefix;
+			this.isPrefix = isprefix;
 		}
 	}
 
@@ -261,20 +307,59 @@ public class MyHashTable<AnyType> {
 	 * 
 	 * @param fileName Path and file name of dictionary
 	 */
+
+	/**
+	 * Load external dictionary file into MyHashTable
+	 * 
+	 * @param fileName Path and file name of dictionary
+	 * @param prifix   True if create prefix while loading words
+	 */
 	private void loadDictionary(String fileName) {
-		List<String> dic = Collections.emptyList();
+		List<String> dict = Collections.emptyList();
+		maxLength = 0;
 		try {
-			dic = Files.readAllLines(Paths.get(fileName), StandardCharsets.UTF_8);
+			dict = Files.readAllLines(Paths.get(fileName), StandardCharsets.UTF_8);
 		} catch (NoSuchFileException e) {
 			System.out.println("Dictionary file not found.");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		for (String line : dic) {
+		for (String line : dict) {
 			insert((AnyType) line);
+			if (line.length() > maxLength)
+				maxLength = line.length();
 		}
-
 	}
 
+	public void loadDictionary(String fileName, boolean prifix) {
+		ArrayList<String> dict = new ArrayList<String>();
+
+		try {
+			BufferedReader in = new BufferedReader(new FileReader(fileName));
+			StringBuilder sb = new StringBuilder();
+			int c;
+			while ((c = in.read()) != -1) {
+				char ch = (char) c;
+				if (ch != '\n') {
+					sb.append(ch);
+					if (sb.length() > 1) {
+						insert((AnyType) sb.toString(), true);
+					}
+				} else {
+					update((AnyType) sb.toString(), false);
+					sb = new StringBuilder();
+				}
+			}
+		} catch (IOException e) {
+			System.err.println("A file error occurred: " + fileName);
+			System.exit(1);
+		}
+	}
+
+	public static void main(String[] args) {
+		MyHashTable<String> a = new MyHashTable<>();
+		a.loadDictionary("src/testDic.txt", true);
+		System.out.println("done");
+	}
 }

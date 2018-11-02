@@ -1,4 +1,5 @@
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
@@ -33,16 +34,6 @@ public class WordPuzzle {
 //		grid = new char[][] { { 'a', 'b', 'c', 'd', 'e' }, { 'o', 'e', 'o', 'o', 'o' }, { 'o', 'o', 'n', 'e', 'o' },
 //				{ 'o', 'e', 'e', 'o', 'o' }, { 'o', 'o', 'o', 'o', 'o' }, { 'o', 'o', 'o', 'o', 'o' } };
 
-	}
-
-	public void printWordPuzzle() {
-		System.out.println("Rows:" + row + ", Columns:" + col);
-		for (int i = 0; i < row; i++) {
-			for (int j = 0; j < col; j++) {
-				System.out.print(grid[i][j] + " ");
-			}
-			System.out.println();
-		}
 	}
 
 	public void solvePuzzle(MyHashTable<String> dictionary) {
@@ -97,9 +88,18 @@ public class WordPuzzle {
 
 	}
 
-	static int input(String prompt) {
-		Scanner sc = new Scanner(System.in);
+	private void addResult(String wordfound) {
+		String[] words = wordfound.split("\n");
+		for (String word : words) {
+			if (word.length() > 1) {
+				result.add(word);
+			}
+		}
+	}
+
+	public static int input(String prompt) {
 		int i = 0;
+		Scanner sc = new Scanner(System.in);
 		do {
 			System.out.print(prompt);
 			if (sc.hasNextInt()) {
@@ -112,13 +112,32 @@ public class WordPuzzle {
 		return i;
 	}
 
-	public void addResult(String wordfound) {
-		String[] words = wordfound.split("\n");
-		for (String word : words) {
-			if (word.length() > 1) {
-				result.add(word);
+	public void printWordPuzzle() {
+		System.out.println("Rows:" + row + ", Columns:" + col);
+		for (int i = 0; i < row; i++) {
+			for (int j = 0; j < col; j++) {
+				System.out.print(grid[i][j] + " ");
+			}
+			System.out.println();
+		}
+	}
+
+	public void printResult() {
+		System.out.println("\nResult: " + getResultCount());
+
+		Iterator<String> it = result.iterator();
+		System.out.print("[");
+		int count = 0;
+		while (it.hasNext()) {
+			System.out.print(it.next() + ", ");
+			count++;
+			if (count == col) {
+				System.out.println();
+				count = 0;
 			}
 		}
+		System.out.println("]");
+		System.out.println();
 	}
 
 	public Set<String> getResult() {
@@ -131,28 +150,25 @@ public class WordPuzzle {
 
 	public static void main(String[] args) {
 
-		MyHashTable<String> dictionary = new MyHashTable<>("src/dictionary.txt");
-		System.out.println("dictionary size: " + dictionary.size());
-		System.out.println("longest word: " + dictionary.maxLength());
-
-		int row = 6;
-//		row = input("please input number of rows:");
-		int col = 5;
-//		col = input("please input number of columns:");
-
+		int row = input("please input number of rows:");
+		int col = input("please input number of columns:");
+//		int row = 10;
+//		int col = 10;
+		boolean usePrefix = false;
+		
 		long startTime = System.currentTimeMillis();
+
+//		MyHashTable<String> dictionary = new MyHashTable<>("src/dictionary.txt");
+//		System.out.println("dictionary size: " + dictionary.size());
+
 		WordPuzzle wordPuzzle = new WordPuzzle(row, col);
 		System.out.println();
 		wordPuzzle.printWordPuzzle();
 
+//		wordPuzzle.solvePuzzle(dictionary);
+		wordPuzzle.printResult();
+
 		long endTime = System.currentTimeMillis();
-
-		wordPuzzle.solvePuzzle(dictionary);
-//		wordPuzzle.addResult(dictionary.findword("noo"));
-
-		System.out.println("\nResult: " + wordPuzzle.getResultCount());
-		System.out.println(wordPuzzle.getResult());
-
 		System.out.println("Elapsed time: " + (endTime - startTime));
 	}
 }
