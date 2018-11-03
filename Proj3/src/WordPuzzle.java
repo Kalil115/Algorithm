@@ -31,20 +31,25 @@ public class WordPuzzle {
 		init();
 	}
 
+	/**
+	 * Fill word puzzle with random characters
+	 * 
+	 */
 	private void init() {
-//		for (int i = 0; i < row; i++) {
-//			for (int j = 0; j < col; j++) {
-//				Random rand = new Random();
-//				grid[i][j] = (char) (rand.nextInt(26) + 'a');
-//			}
-//		}
-//		grid = new char[][] { { 'f', 'o', 'u', 'd', 'e' }, { 'o', 'e', 'o', 'o', 'o' }, { 'o', 'o', 'n', 'e', 'o' },
-//				{ 'o', 'e', 'e', 'o', 'o' }, { 't', 'h', 'r', 'e', 'e' }, { 'o', 'o', 'o', 'o', 'o' } };
-
-		
-		grid = new char[][] {{'a','a','j'},{'j','q','l'},{'t','r','o'}};
+		for (int i = 0; i < row; i++) {
+			for (int j = 0; j < col; j++) {
+				Random rand = new Random();
+				grid[i][j] = (char) (rand.nextInt(26) + 'a');
+			}
+		}
 	}
 
+	/**
+	 * solve the word puzzle
+	 * 
+	 * @param dictionary to look up
+	 * @param usePrefix  use prefix algorithm to solve the puzzle
+	 */
 	public void solvePuzzle(MyHashTable<String> dictionary, boolean usePrefix) {
 		if (usePrefix == true) {
 			solvePuzzleWithPrefix(dictionary);
@@ -53,7 +58,14 @@ public class WordPuzzle {
 		}
 	}
 
+	/**
+	 * Internal method to solve the puzzle with prefix
+	 * 
+	 * @param dictionary
+	 */
 	private void solvePuzzleWithPrefix(MyHashTable<String> dictionary) {
+
+		// starting point
 		for (int i = 0; i < row; i++) {
 			for (int j = 0; j < col; j++) {
 				// scan rightward
@@ -220,6 +232,11 @@ public class WordPuzzle {
 		}
 	}
 
+	/**
+	 * Internal method to solve the puzzle normally
+	 * 
+	 * @param dictionary
+	 */
 	private void solvePuzzle(MyHashTable<String> dictionary) {
 
 		for (int i = 0; i < row; i++) {
@@ -242,7 +259,7 @@ public class WordPuzzle {
 					}
 				}
 
-				// scan up-right
+				// scan up-right diagonal
 				if (i > 0 && j < col - 1) {
 					StringBuilder diagonalUR = new StringBuilder();
 					int count = 0;
@@ -255,7 +272,7 @@ public class WordPuzzle {
 					}
 				}
 
-				// scan down-right
+				// scan down-right diagonal
 				if (i < row - 1 && j < col - 1) {
 					StringBuilder diagonalDR = new StringBuilder();
 					int count = 0;
@@ -272,6 +289,11 @@ public class WordPuzzle {
 
 	}
 
+	/**
+	 * Add found word in a result Set
+	 * 
+	 * @param wordfound words found in the dictionary
+	 */
 	private void addResult(String wordfound) {
 		String[] words = wordfound.split("\n");
 		for (String word : words) {
@@ -281,6 +303,12 @@ public class WordPuzzle {
 		}
 	}
 
+	/**
+	 * prompt
+	 * 
+	 * @param prompt
+	 * @return
+	 */
 	public static int input(String prompt) {
 		int i = 0;
 		Scanner sc = new Scanner(System.in);
@@ -296,6 +324,9 @@ public class WordPuzzle {
 		return i;
 	}
 
+	/**
+	 * print puzzle in the console
+	 */
 	public void printWordPuzzle() {
 		System.out.println("Rows:" + row + ", Columns:" + col);
 		for (int i = 0; i < row; i++) {
@@ -306,8 +337,11 @@ public class WordPuzzle {
 		}
 	}
 
+	/**
+	 * print the resut set
+	 */
 	public void printResult() {
-		System.out.println("\nResult: " + getResultCount());
+		System.out.println("\nResult: " + getResultCount() + " words.");
 
 		Iterator<String> it = result.iterator();
 		System.out.print("[");
@@ -336,24 +370,69 @@ public class WordPuzzle {
 	}
 
 	public static void main(String[] args) {
+		int row = 0;
+		int col = 0;
+		boolean usePrefix = false;
+		boolean input = true;
+		Scanner sc = new Scanner(System.in);
 
-//		int row = input("please input number of rows:");
-//		int col = input("please input number of columns:");
-		int row = 3;
-		int col = 3;
-		boolean usePrefix = true;
+		while (row <= 0) {
+			System.out.print("please input number of rows:");
+			if (sc.hasNextInt()) {
+				row = sc.nextInt();
+			} else {
+				System.out.println("please enter a number greater than 0.");
+				sc.next();
+			}
+		}
+
+		while (col <= 0) {
+			System.out.print("please input number of columns:");
+			if (sc.hasNextInt()) {
+				col = sc.nextInt();
+			} else {
+				System.out.println("please enter a number greater than 0.");
+				sc.next();
+			}
+		}
+
+		while (input) {
+			System.out.print("Do you want to use prefix when solving puzzle?(Y/N)");
+			if (sc.hasNextLine()) {
+				sc.nextLine();
+				String yn = sc.nextLine();
+				if (yn.equals("Y") || yn.equals("y") || yn.equals("yes")) {
+					usePrefix = true;
+					input = false;
+				} else {
+					usePrefix = false;
+					input = false;
+				}
+			}
+		}
+
+		sc.close();
 
 		long startTime = System.currentTimeMillis();
+		System.out.print("Loading dictionary...");
 		MyHashTable<String> dictionary = new MyHashTable<>("src/dictionary.txt", usePrefix);
-//		MyHashTable<String> dictionary = new MyHashTable<>("src/dictionary.txt");
+		System.out.println("done");
 
+		System.out.print("Generating a " + row + "x" + col + " word puzzle ");
 		WordPuzzle wordPuzzle = new WordPuzzle(row, col);
-
+		System.out.println("done");
+		System.out.println("Rows:" + row + ", Columns:" + col);
 		System.out.println();
-		wordPuzzle.printWordPuzzle();
 
+//		wordPuzzle.printWordPuzzle();
+		if (usePrefix) {
+			System.out.print("Solving puzzle with prefix enhancement...");
+		} else {
+			System.out.print("Solving puzzle...");
+		}
 		wordPuzzle.solvePuzzle(dictionary, usePrefix);
-		wordPuzzle.printResult();
+		System.out.println("done");
+//		wordPuzzle.printResult();
 
 		long endTime = System.currentTimeMillis();
 		System.out.println("Elapsed time: " + (endTime - startTime));

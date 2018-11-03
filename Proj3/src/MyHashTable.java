@@ -204,7 +204,7 @@ public class MyHashTable<AnyType> {
 		int currentPos1 = findPos((AnyType) x);
 		int currentPos2 = findPos((AnyType) reversed);
 
-		// find 1
+		// find 1 result
 		if (isActive(currentPos1) ^ isActive(currentPos2)) {
 			if (isActive(currentPos1)) {
 				result.append((String) array[currentPos1].element);
@@ -213,7 +213,7 @@ public class MyHashTable<AnyType> {
 			}
 			return result.toString();
 		}
-		// find 2
+		// find 2 results
 		if (isActive(currentPos1) && isActive(currentPos2)) {
 			result.append((String) array[currentPos1].element).append("\n");
 			result.append((String) array[currentPos2].element);
@@ -346,13 +346,7 @@ public class MyHashTable<AnyType> {
 	 * Load external dictionary file into MyHashTable
 	 * 
 	 * @param fileName Path and file name of dictionary
-	 */
-
-	/**
-	 * Load external dictionary file into MyHashTable
-	 * 
-	 * @param fileName Path and file name of dictionary
-	 * @param prifix   True if create prefix while loading words
+	 *
 	 */
 	private void loadDictionary(String fileName) {
 		List<String> dict = Collections.emptyList();
@@ -372,6 +366,12 @@ public class MyHashTable<AnyType> {
 		}
 	}
 
+	/**
+	 * Load external dictionary file into MyHashTable
+	 * 
+	 * @param fileName Path and file name of dictionary
+	 * @param prifix   True if create prefix while loading words
+	 */
 	public void loadDictionary(String fileName, boolean prifix) {
 		if (prifix == true) {
 			maxLength = 0;
