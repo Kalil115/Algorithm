@@ -5,7 +5,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,6 +29,11 @@ public class MyHashTable<AnyType> {
 	public MyHashTable(String dictionaryFile) {
 		this(DEFAULT_TABLE_SIZE);
 		loadDictionary(dictionaryFile);
+	}
+
+	public MyHashTable(String dictionaryFile, boolean usePrefix) {
+		this(DEFAULT_TABLE_SIZE);
+		loadDictionary(dictionaryFile, usePrefix);
 	}
 
 	/**
@@ -95,7 +99,11 @@ public class MyHashTable<AnyType> {
 		// Copy table over
 		for (HashEntry<AnyType> entry : oldArray)
 			if (entry != null)
-				insert(entry.element);
+				if (entry.isPrefix == true) {
+					insert(entry.element, true);
+				} else {
+					insert(entry.element);
+				}
 	}
 
 	/**
@@ -172,12 +180,23 @@ public class MyHashTable<AnyType> {
 	}
 
 	/**
-	 * Find an item in the hash table.
+	 * Find an word in the hash table
 	 * 
-	 * @param x the item to search for.
-	 * @return the matching item.
+	 * @param x the word to search for.
+	 * @return the matching word.
 	 */
-	public String findword(String x) {
+	public String findWord(AnyType x) {
+		int currentPos = findPos(x);
+		return (String) array[currentPos].element;
+	}
+
+	/**
+	 * Find an word in the hash table with both forward and backward.
+	 * 
+	 * @param x the word to search for.
+	 * @return the matching word.
+	 */
+	public String findWordwithReverse(String x) {
 		StringBuilder sb = new StringBuilder();
 		StringBuilder result = new StringBuilder();
 		String reversed = sb.append(x).reverse().toString();
@@ -214,6 +233,27 @@ public class MyHashTable<AnyType> {
 		return array[currentPos] != null && array[currentPos].isActive;
 	}
 
+	/**
+	 * check if a item is a prefix
+	 *
+	 * @param x item to be found
+	 * @return ture if item is a prefix
+	 */
+	public boolean isPrefix(AnyType x) {
+		int currentPos = findPos(x);
+		if (isActive(currentPos) == true) {
+			return isPrefix(currentPos);
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Internal method to check if a item is a prefix
+	 * 
+	 * @param currentPos the result of a call to findPos.
+	 * @return true if currentPos is a prefix.
+	 */
 	private boolean isPrefix(int currentPos) {
 		return array[currentPos] != null && array[currentPos].isPrefix;
 	}
@@ -333,33 +373,37 @@ public class MyHashTable<AnyType> {
 	}
 
 	public void loadDictionary(String fileName, boolean prifix) {
-		ArrayList<String> dict = new ArrayList<String>();
-
-		try {
-			BufferedReader in = new BufferedReader(new FileReader(fileName));
-			StringBuilder sb = new StringBuilder();
-			int c;
-			while ((c = in.read()) != -1) {
-				char ch = (char) c;
-				if (ch != '\n') {
-					sb.append(ch);
-					if (sb.length() > 1) {
-						insert((AnyType) sb.toString(), true);
+		if (prifix == true) {
+			maxLength = 0;
+			try {
+				BufferedReader in = new BufferedReader(new FileReader(fileName));
+				StringBuilder sb = new StringBuilder();
+				int c;
+				while ((c = in.read()) != -1) {
+					char ch = (char) c;
+					if (ch != '\n') {
+						sb.append(ch);
+						if (sb.length() > 1) {
+							insert((AnyType) sb.toString(), true);
+						}
+					} else {
+						if (sb.toString().length() > maxLength) {
+							maxLength = sb.toString().length();
+						}
+						if (sb.length() > 1) {
+							update((AnyType) sb.toString(), false);
+						}
+						sb = new StringBuilder();
 					}
-				} else {
-					update((AnyType) sb.toString(), false);
-					sb = new StringBuilder();
 				}
+				in.close();
+			} catch (IOException e) {
+				System.err.println("A file error occurred: " + fileName);
+				System.exit(1);
 			}
-		} catch (IOException e) {
-			System.err.println("A file error occurred: " + fileName);
-			System.exit(1);
-		}
-	}
 
-	public static void main(String[] args) {
-		MyHashTable<String> a = new MyHashTable<>();
-		a.loadDictionary("src/testDic.txt", true);
-		System.out.println("done");
+		} else {
+			loadDictionary(fileName);
+		}
 	}
 }
