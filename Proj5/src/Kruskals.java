@@ -1,14 +1,17 @@
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Queue;
 
 public class Kruskals {
 
-	List<String> vertexList;
+	private List<String> vertexList;
+	private Queue<Edge> edgeQ;
 
-	public void minSpanningTree(PriorityQueue<Edge> edgeQ) {
+	public void minSpanningTree() {
 		List<Edge> result = new ArrayList<>();
 		DisjSets disjSets = new DisjSets(vertexList.size());
 		int edgeCount = 0;
@@ -22,11 +25,10 @@ public class Kruskals {
 			if (root1 != root2) {
 				result.add(edge);
 				disjSets.union(root1, root2);
+				edgeCount++;
 			}
-			edgeCount++;
-
 		}
-		
+
 		System.out.println("Result:");
 		for (Edge e : result) {
 			System.out.println(e);
@@ -36,9 +38,9 @@ public class Kruskals {
 
 	}
 
-	public PriorityQueue<Edge> readGraph(String fileName) {
+	public void readGraph(String fileName) {
 		String line = "";
-		PriorityQueue<Edge> pQ = new PriorityQueue<>();
+		edgeQ = new PriorityQueue<>();
 		vertexList = new ArrayList<>();
 		try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
 			while ((line = br.readLine()) != null) {
@@ -46,13 +48,14 @@ public class Kruskals {
 				vertexList.add(str[0]);
 				for (int i = 1; i < str.length / 2 + 1; i++) {
 					Edge edge = new Edge(str[0], str[2 * i - 1], Integer.parseInt(str[2 * i]));
-					pQ.add(edge);
+					edgeQ.add(edge);
 				}
 			}
-		} catch (Exception e) {
+		} catch(FileNotFoundException fnfe) {
+			System.out.println("graph csv file not found");
+		}catch (Exception e) {
 			e.printStackTrace();
 		}
-		return pQ;
 	}
 
 	private class Edge implements Comparable<Edge> {
@@ -60,7 +63,7 @@ public class Kruskals {
 		private String vertex2;
 		private int weight;
 
-		public Edge(String vertex1, String vertex2, int weight) {
+		private Edge(String vertex1, String vertex2, int weight) {
 			this.vertex1 = vertex1;
 			this.vertex2 = vertex2;
 			this.weight = weight;
@@ -73,15 +76,14 @@ public class Kruskals {
 
 		@Override
 		public String toString() {
-			return "Edge("+vertex1 + ", " + vertex2 +") weight=" + weight ;
+			return "Edge(" + vertex1 + ", " + vertex2 + ") weight=" + weight;
 		}
-		
-		
+
 	}
 
 	public static void main(String[] args) {
 		Kruskals kruskals = new Kruskals();
-		PriorityQueue<Edge> edgeQ = kruskals.readGraph("src/project5_data.csv");
-		kruskals.minSpanningTree(edgeQ);
+		kruskals.readGraph("src/project5_data.csv");
+		kruskals.minSpanningTree();
 	}
 }
